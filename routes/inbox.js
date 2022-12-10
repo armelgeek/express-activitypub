@@ -3,10 +3,10 @@ const express = require('express'),
       crypto = require('crypto'),
       request = require('request'),
       router = express.Router();
-
-function signAndSend(message, name, domain, req, res, targetDomain) { 
+// b292e2394f4e4608479ffffba6428f99
+function signAndSend(message, name, domain, req, res, targetDomain,isFollow=false) { 
   // get the URI of the actor object and append 'inbox' to it
-  let inbox = message.object.actor+'/inbox';
+  let inbox = isFollow ? message.object+ '/inbox' : message.object.actor+'/inbox';
   let inboxFragment = inbox.replace('https://'+targetDomain,'');
   // get the private key
   let db = req.app.get('db');
@@ -68,6 +68,34 @@ function parseJSON(text) {
   }
 }
 
+function followUser(name, domain,req, res, targetDomain,to) {
+   const guid = crypto.randomBytes(16).toString('hex');
+  let message = {
+      "@context": "https://www.w3.org/ns/activitystreams",
+      id: `https://${domain}/s/${guid}`,
+      type: "Follow",
+      to: [
+      `${to}`,
+      "https://www.w3.org/ns/activitystreams#Public",
+    ],
+    actor: `https://${domain}/u/${name}`,
+    object: `${to}`,
+  }
+  signAndSend(message, name, domain, req, res, targetDomain,true);
+}
+
+
+router.post('/follow', function (req, res) {
+  // pass in a name for an account, if the account doesn't exist, create it!
+  let domain = req.app.get('domain');
+ // let name = req.body.object.replace(`https://${domain}/u/`,'');
+ try{
+    followUser("haja", domain, req, res, "toot.community","https://toot.community/users/armelwanes");
+ }catch(e){
+    console.log('e',e);
+ }
+
+})
 router.post('/', function (req, res) {
   // pass in a name for an account, if the account doesn't exist, create it!
   let domain = req.app.get('domain');

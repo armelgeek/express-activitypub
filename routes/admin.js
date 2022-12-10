@@ -24,6 +24,17 @@ function createActor(name, domain, pubkey) {
   };
 }
 
+
+
+function getEvents(name, domain, pubkey) {
+  return {
+    '@context': [
+      'https://www.w3.org/ns/activitystreams',
+      'https://w3id.org/security/v1'
+    ]
+  };
+}
+
 function createWebfinger(name, domain) {
   return {
     'subject': `acct:${name}@${domain}`,
@@ -36,6 +47,8 @@ function createWebfinger(name, domain) {
     ]
   };
 }
+// https://toot.community/users/armelwanes
+
 
 router.post('/create', function (req, res) {
   // pass in a name for an account, if the account doesn't exist, create it!
